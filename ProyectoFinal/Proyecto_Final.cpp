@@ -142,8 +142,12 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
-	// CARGA DE TU MODELO PRINCIPAL
+	// CARGA DE MODELOS
 	Model conjuntoNorte((char*)"Models/conjuntoNorte/conjunto_norte.obj");
+	Model stand1((char*)"Models/stands/stand1_2x1.obj");
+	Model stand2((char*)"Models/stands/stand1_4x2.obj");
+	Model stand3((char*)"Models/stands/stand2_4x2.obj");
+
 
 	// Setup VAO and VBO for the light cube
 	GLuint VBO, VAO;
@@ -238,14 +242,41 @@ int main()
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		// --- DIBUJADO DE LA FACULTAD ---
-		glm::mat4 model(1);
+		glm::mat4 model(1); // Aquí se declara por PRIMERA vez
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));     
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		conjuntoNorte.Draw(lightingShader);
 		// -------------------------------
+
+
+		// --- DIBUJADO DE LOS STANDS ---
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		stand1.Draw(lightingShader);
+
+
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		stand2.Draw(lightingShader);
+
+
+		model = glm::mat4(1); 
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		stand3.Draw(lightingShader);
+		// -------------------------------
+
+
 
 		// Draw the lamp object
 		lampShader.Use();
