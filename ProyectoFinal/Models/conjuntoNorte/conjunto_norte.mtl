@@ -99,7 +99,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -s 32 32 32 Textures/losaTitulacion.jpg
+map_Kd Textures/losaTitulacion.jpg
 
 newmtl Material.013
 Ns 250.000000
@@ -279,7 +279,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -s 2 2 2 Textures/paredesFuera.jpg
+map_Kd Textures/paredesFuera.jpg
 
 newmtl Material.032
 Ns 250.000000
@@ -289,7 +289,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -s 2 2 2 Textures/paredesFuera.jpg
+map_Kd Textures/paredesFuera.jpg
 
 newmtl Material.033
 Ns 250.000000
@@ -429,7 +429,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -o 7 0 0 -s 10 10 10 Textures/barandalEscalera.jpg
+map_Kd -o 7 0 0 Textures/barandalEscalera.jpg
 
 newmtl escalones.002
 Ns 250.000000
@@ -449,7 +449,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -s 2 2 2 Textures/paredesFuera.jpg
+map_Kd Textures/paredesFuera.jpg
 
 newmtl piso
 Ns 250.000000
@@ -459,4 +459,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd -s 32 32 32 Textures/piso.jpg
+map_Kd Textures/piso.jpg

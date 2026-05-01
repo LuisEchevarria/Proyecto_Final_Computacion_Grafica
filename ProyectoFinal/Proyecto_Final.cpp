@@ -33,7 +33,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 2.0f, 10.0f)); // Moví la cámara un poco hacia atrás y arriba para que veas el modelo
+Camera  camera(glm::vec3(10.5f, 3.3f, 25.0f));
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -107,7 +107,7 @@ int main()
 	glfwInit();
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Conjunto Norte", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Conjunto Norte - Equipo 6", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -240,6 +240,7 @@ int main()
 		// --- DIBUJADO DE LA FACULTAD ---
 		glm::mat4 model(1);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));     
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
