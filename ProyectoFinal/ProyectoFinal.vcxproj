@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Animación_Básica.cpp" />
+    <ClCompile Include="Proyecto_Final.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\lamp.frag" />
