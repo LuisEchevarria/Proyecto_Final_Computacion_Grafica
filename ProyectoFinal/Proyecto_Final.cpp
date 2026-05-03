@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 // GLEW
 #include <GL/glew.h>
@@ -42,6 +43,14 @@ bool firstMouse = true;
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
+
+// --- Sistema de Iluminacion Dinamica Dia / Noche ---
+// dayMode = true  -> Vista de Dia
+// dayMode = false -> Vista Nocturna
+// dayFactor interpola suavemente entre 0.0 (noche) y 1.0 (dia)
+bool dayMode = true;
+float dayFactor = 1.0f;
+const float DAY_NIGHT_TRANSITION_SPEED = 2.0f; // segundos para completar la transicion
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
@@ -101,6 +110,26 @@ glm::vec3 Light1 = glm::vec3(0);
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
+// --- Variables para la animación del Roll-up ---
+float animProgress = 0.0f;
+bool animActive = false;
+const float ALTURA_LONA =0.3f;
+
+// --- Función de Interpolación Elástica (Efecto de Rebote) ---
+
+float easeOutBack(float x) {
+	const float c1 = 1.70158f;
+	const float c3 = c1 + 1.0f;
+
+	if (x == 0.0f) return 0.0f;
+	if (x >= 1.0f) return 1.0f;
+
+	// Sube, pasa un poquitito el límite simulando el tirón humano, y baja a su lugar
+	return 1.0f + c3 * pow(x - 1.0f, 3.0f) + c1 * pow(x - 1.0f, 2.0f);
+}
+
+
+
 int main()
 {
 	// Init GLFW
@@ -147,6 +176,8 @@ int main()
 	Model stand1((char*)"Models/stands/stand1_2x1.obj");
 	Model stand2((char*)"Models/stands/stand1_4x2.obj");
 	Model stand3((char*)"Models/stands/stand2_4x2.obj");
+	Model tubo((char*)"Models/banner/tubo_banner.obj");
+	Model banner((char*)"Models/banner/banner.obj");
 
 
 	// Setup VAO and VBO for the light cube
@@ -181,8 +212,18 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 
-		// Clear the colorbuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		// --- Sistema Dinamico Dia / Noche : interpolacion suave ---
+		float targetFactor = dayMode ? 1.0f : 0.0f;
+		if (dayFactor < targetFactor)
+			dayFactor = std::min(targetFactor, dayFactor + deltaTime / DAY_NIGHT_TRANSITION_SPEED);
+		else if (dayFactor > targetFactor)
+			dayFactor = std::max(targetFactor, dayFactor - deltaTime / DAY_NIGHT_TRANSITION_SPEED);
+
+		// Color del cielo : azul claro de dia, azul muy oscuro de noche
+		glm::vec3 daySky(0.53f, 0.81f, 0.92f);
+		glm::vec3 nightSky(0.02f, 0.02f, 0.08f);
+		glm::vec3 sky = glm::mix(nightSky, daySky, dayFactor);
+		glClearColor(sky.r, sky.g, sky.b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// OpenGL options
@@ -194,22 +235,56 @@ int main()
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
-		// Directional light
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
+		// --- Luz direccional : Sol calido fuerte de dia, Luna fria tenue de noche ---
+		// (Simula la luz que entra por los ventanales del conjunto norte)
+		glm::vec3 dayDirAmb(0.55f, 0.55f, 0.50f);
+		glm::vec3 dayDirDif(0.95f, 0.90f, 0.78f); // tono calido del sol
+		glm::vec3 dayDirSpc(0.45f, 0.45f, 0.40f);
+		glm::vec3 nightDirAmb(0.04f, 0.04f, 0.08f);
+		glm::vec3 nightDirDif(0.10f, 0.12f, 0.22f); // tono frio de luna
+		glm::vec3 nightDirSpc(0.05f, 0.05f, 0.10f);
 
-		// Point light 1
-		glm::vec3 lightColor;
-		lightColor.x = abs(sin(glfwGetTime() * Light1.x));
-		lightColor.y = abs(sin(glfwGetTime() * Light1.y));
-		lightColor.z = sin(glfwGetTime() * Light1.z);
+		glm::vec3 dirAmb = glm::mix(nightDirAmb, dayDirAmb, dayFactor);
+		glm::vec3 dirDif = glm::mix(nightDirDif, dayDirDif, dayFactor);
+		glm::vec3 dirSpc = glm::mix(nightDirSpc, dayDirSpc, dayFactor);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), dirAmb.r, dirAmb.g, dirAmb.b);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), dirDif.r, dirDif.g, dirDif.b);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), dirSpc.r, dirSpc.g, dirSpc.b);
+
+		// --- Luz puntual : focos interiores apagados de dia, encendidos calidos de noche ---
+		// Si el modo "evento" (tecla ESPACIO) esta activo, la animacion strobe tiene prioridad.
+		glm::vec3 ptAmb, ptDif, ptSpc;
+		if (active)
+		{
+			// Modo evento : efecto strobe original del equipo
+			glm::vec3 lightColor;
+			lightColor.x = abs(sin(glfwGetTime() * Light1.x));
+			lightColor.y = abs(sin(glfwGetTime() * Light1.y));
+			lightColor.z = sin(glfwGetTime() * Light1.z);
+			ptAmb = lightColor;
+			ptDif = lightColor;
+			ptSpc = glm::vec3(1.0f, 0.2f, 0.2f);
+		}
+		else
+		{
+			// Iluminacion interior : foco amarillo calido encendido en la noche
+			glm::vec3 dayPtAmb(0.0f, 0.0f, 0.0f);
+			glm::vec3 dayPtDif(0.0f, 0.0f, 0.0f);
+			glm::vec3 dayPtSpc(0.0f, 0.0f, 0.0f);
+			glm::vec3 nightPtAmb(0.20f, 0.15f, 0.05f);
+			glm::vec3 nightPtDif(1.00f, 0.85f, 0.40f);
+			glm::vec3 nightPtSpc(1.00f, 0.90f, 0.50f);
+			ptAmb = glm::mix(nightPtAmb, dayPtAmb, dayFactor);
+			ptDif = glm::mix(nightPtDif, dayPtDif, dayFactor);
+			ptSpc = glm::mix(nightPtSpc, dayPtSpc, dayFactor);
+		}
 
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), ptAmb.r, ptAmb.g, ptAmb.b);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), ptDif.r, ptDif.g, ptDif.b);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), ptSpc.r, ptSpc.g, ptSpc.b);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
@@ -277,6 +352,47 @@ int main()
 		// -------------------------------
 
 
+		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
+
+		//DIBUJAR LA BASE 
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		tubo.Draw(lightingShader);
+
+		// LÓGICA Y DIBUJO DE LA LONA
+
+		// Solo se calcula y dibuja la lona si la animación ya inició
+		if (animActive) {
+
+			if (animProgress < 1.0f) {
+				animProgress += deltaTime * 1.0f;
+				if (animProgress > 1.0f) animProgress = 1.0f;
+			}
+
+			float Sy = easeOutBack(animProgress);
+
+			if (Sy < 0.001f) Sy = 0.001f;
+
+			float Y_TUBO = 4.88f;
+			float Ty = ALTURA_LONA * (1.0f - Sy);
+
+			model = glm::mat4(1);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.01f));
+
+			// Transformación anclada arriba
+			model = glm::translate(model, glm::vec3(0.0f, Y_TUBO, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, Sy, 1.0f));
+			model = glm::translate(model, glm::vec3(0.0f, -Y_TUBO, 0.0f));
+
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			banner.Draw(lightingShader);
+		}
+		// ----------------------------------------
+		
+
+		
+		
 
 		// Draw the lamp object
 		lampShader.Use();
@@ -336,9 +452,23 @@ void DoMovement()
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+	// Tecla R para reiniciar y lanzar la animación del cartel
+	if (keys[GLFW_KEY_R])
+	{
+		animActive = true;
+		animProgress = 0.0f; // Reinicia el contador para verla desde el principio
+	}
+
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	// Toggle Vista de Dia / Vista Nocturna
+	if (GLFW_KEY_L == key && GLFW_PRESS == action)
+	{
+		dayMode = !dayMode;
+		std::cout << "[Iluminacion] Modo: " << (dayMode ? "Vista de Dia" : "Vista Nocturna") << std::endl;
 	}
 
 	if (key >= 0 && key < 1024)
