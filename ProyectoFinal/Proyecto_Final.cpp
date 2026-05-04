@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <vector>
+#include <string>
 
 // GLEW
 #include <GL/glew.h>
@@ -113,10 +115,93 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 // --- Variables para la animación del Roll-up ---
 float animProgress = 0.0f;
 bool animActive = false;
-const float ALTURA_LONA =0.3f;
+const float ALTURA_LONA = 0.3f;
+
+// --- Skybox ---
+GLuint skyboxVAO, skyboxVBO;
+GLuint cubemapDay, cubemapNight;
+Shader* skyboxShaderPtr;
+
+GLfloat skyboxVertices[] = {
+	// Positions
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
+
+// --- Función para Cargar Cubemap ---
+GLuint LoadCubemap(std::vector<std::string> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Error cargando skybox: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}
 
 // --- Función de Interpolación Elástica (Efecto de Rebote) ---
-
 float easeOutBack(float x) {
 	const float c1 = 1.70158f;
 	const float c3 = c1 + 1.0f;
@@ -171,6 +256,40 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
+	// --- Configuración e Inicialización de Skybox ---
+	Shader skyboxShader("Shader/SkyBox.vs", "Shader/SkyBox.frag");
+	skyboxShaderPtr = &skyboxShader;
+
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+	std::vector<std::string> facesDay = {
+		"SkyBox/rightdia.jpg",
+		"SkyBox/leftdia.jpg",
+		"SkyBox/topdia.jpg",
+		"SkyBox/bottomdia.jpg",
+		"SkyBox/backdia.jpg",
+		"SkyBox/frontdia.jpg"
+	};
+
+	std::vector<std::string> facesNight = {
+		"SkyBox/rightnoche.jpg",
+		"SkyBox/leftnoche.jpg",
+		"SkyBox/topnoche.jpg",
+		"SkyBox/bottomdnoche.jpg",
+		"SkyBox/backnoche.jpg",
+		"SkyBox/frontnoche.jpg"
+	};
+
+	cubemapDay = LoadCubemap(facesDay);
+	cubemapNight = LoadCubemap(facesNight);
+	// -----------------------------------------------
+
 	// CARGA DE MODELOS
 	Model conjuntoNorte((char*)"Models/conjuntoNorte/conjunto_norte.obj");
 	Model stand1((char*)"Models/stands/stand1_2x1.obj");
@@ -219,7 +338,7 @@ int main()
 		else if (dayFactor > targetFactor)
 			dayFactor = std::max(targetFactor, dayFactor - deltaTime / DAY_NIGHT_TRANSITION_SPEED);
 
-		// Color del cielo : azul claro de dia, azul muy oscuro de noche
+		// Color del cielo : azul claro de dia, azul muy oscuro de noche (Opcional, el Skybox ya cubre el fondo)
 		glm::vec3 daySky(0.53f, 0.81f, 0.92f);
 		glm::vec3 nightSky(0.02f, 0.02f, 0.08f);
 		glm::vec3 sky = glm::mix(nightSky, daySky, dayFactor);
@@ -328,7 +447,7 @@ int main()
 
 		// --- DIBUJADO DE LOS STANDS ---
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
@@ -343,7 +462,7 @@ int main()
 		stand2.Draw(lightingShader);
 
 
-		model = glm::mat4(1); 
+		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -389,10 +508,7 @@ int main()
 			banner.Draw(lightingShader);
 		}
 		// ----------------------------------------
-		
 
-		
-		
 
 		// Draw the lamp object
 		lampShader.Use();
@@ -410,6 +526,37 @@ int main()
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
+
+		// --- DIBUJADO DEL SKYBOX ---
+		glDepthFunc(GL_LEQUAL); // Cambia la función de profundidad para asegurar que se dibuje en el fondo
+
+		skyboxShader.Use();
+
+		// Remover la traslación de la matriz de vista para que el skybox siga a la cámara
+		glm::mat4 viewSky = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewSky));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		// 1. Enviar el factor de mezcla al shader (sincronizado con la iluminación)
+		glUniform1f(glGetUniformLocation(skyboxShader.Program, "blendFactor"), dayFactor);
+
+		// 2. Bindear el cubemap de DÍA a la unidad de textura 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapDay);
+		glUniform1i(glGetUniformLocation(skyboxShader.Program, "skyboxDay"), 0);
+
+		// 3. Bindear el cubemap de NOCHE a la unidad de textura 1
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapNight);
+		glUniform1i(glGetUniformLocation(skyboxShader.Program, "skyboxNight"), 1);
+
+		// 4. Dibujar el cubo
+		glBindVertexArray(skyboxVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS); // Restaura la función de profundidad original
+		// ---------------------------
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
