@@ -62,6 +62,19 @@ glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f, 0.0f, 0.0f)
 };
 
+// Positions of the roof lights (Ceiling lights)
+glm::vec3 roofLightPositions[] = {
+	glm::vec3(5.106f, 8.333f, -17.050f), // P1
+	glm::vec3(-5.503f, 8.333f, -17.050f), // P2
+	glm::vec3(-16.172f, 8.333f, -17.050f), // P3
+	glm::vec3(5.106f, 8.333f, -28.010f), // P4
+	glm::vec3(-5.503f, 8.333f, -28.010f), // P5
+	glm::vec3(-16.172f, 8.333f, -28.010f), // P6
+	glm::vec3(5.106f, 8.333f, -39.312f), // P7
+	glm::vec3(-5.503f, 8.333f, -39.312f), // P8
+	glm::vec3(-16.172f, 8.333f, -39.312f)  // P9
+};
+
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -419,6 +432,28 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.7f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
+
+		// --- Luces de techo (9 focos) : Solo encedidas de noche ---
+		glm::vec3 dayRoofDif(0.0f, 0.0f, 0.0f);
+		glm::vec3 nightRoofDif(2.5f, 2.3f, 2.0f);
+		glm::vec3 roofDif = glm::mix(nightRoofDif, dayRoofDif, dayFactor);
+
+		for (int i = 0; i < 9; i++) {
+			std::string base = "roofLights[" + std::to_string(i) + "].";
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "position").c_str()), roofLightPositions[i].x, roofLightPositions[i].y, roofLightPositions[i].z);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "direction").c_str()), 0.0f, -1.0f, 0.0f); // Apuntan hacia abajo
+
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "ambient").c_str()), 0.1f, 0.1f, 0.1f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "diffuse").c_str()), roofDif.r, roofDif.g, roofDif.b);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "specular").c_str()), roofDif.r, roofDif.g, roofDif.b);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "constant").c_str()), 1.0f);
+
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "linear").c_str()), 0.007f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "quadratic").c_str()), 0.0002f);
+
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "cutOff").c_str()), glm::cos(glm::radians(45.0f)));
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "outerCutOff").c_str()), glm::cos(glm::radians(65.0f)));
+		}
 
 		// Set material properties
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 5.0f);
