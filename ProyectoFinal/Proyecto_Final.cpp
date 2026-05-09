@@ -311,6 +311,14 @@ int main()
 	Model tubo((char*)"Models/banner/tubo_banner.obj");
 	Model banner((char*)"Models/banner/banner.obj");
 
+	// --- CARGA DEL MODELO FEMENINO ---
+	Model cabezaFemenino((char*)"Models/visitanteFemenino/cabezaFemenino.obj");
+	Model brazoDerFemenino((char*)"Models/visitanteFemenino/brazoDerFemenino.obj");
+	Model brazoIzqFemenino((char*)"Models/visitanteFemenino/brazoIzqFemenino.obj");
+	Model piernaDerFemenino((char*)"Models/visitanteFemenino/piernaDerFemenino.obj");
+	Model torsoFemenino((char*)"Models/visitanteFemenino/torsoFemenino.obj");
+	Model piernaIzqFemenino((char*)"Models/visitanteFemenino/piernaIzqFemenino.obj");
+
 
 	// Setup VAO and VBO for the light cube
 	GLuint VBO, VAO;
@@ -504,6 +512,19 @@ int main()
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		stand3.Draw(lightingShader);
 		// -------------------------------
+
+		// --- DIBUJADO DEL MODELO FEMENINO ---
+		// Como ya vienen con las coordenadas desde Blender, solo usamos una matriz identidad.
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0); 
+		cabezaFemenino.Draw(lightingShader);
+		brazoDerFemenino.Draw(lightingShader);
+		brazoIzqFemenino.Draw(lightingShader);
+		piernaDerFemenino.Draw(lightingShader);
+		torsoFemenino.Draw(lightingShader);
+		piernaIzqFemenino.Draw(lightingShader);
+		// ------------------------------------
 
 
 		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
