@@ -50,8 +50,17 @@ float L_Arm = 0.0f; // Brazo Izquierdo
 float R_Leg = 0.0f; // Pierna Derecha
 float L_Leg = 0.0f; // Pierna Izquierda
 
+// --- VARIABLES PARA EL VISITANTE MASCULINO ---
+float visMasPosX = 0.0f, visMasPosY = 0.0f, visMasPosZ = 0.0f;
+float rotVisMas = 0.0f;
+
+float R_Arm_Mas = 0.0f;
+float L_Arm_Mas = 0.0f;
+float R_Leg_Mas = 0.0f;
+float L_Leg_Mas = 0.0f; 
+
 #define MAX_FRAMES 100 
-int i_max_steps = 40;
+int i_max_steps = 80;
 int i_curr_steps = 0;
 
 typedef struct _frame {
@@ -441,6 +450,14 @@ int main()
 	Model torsoFemenino((char*)"Models/visitanteFemenino/torsoFemenino.obj");
 	Model piernaIzqFemenino((char*)"Models/visitanteFemenino/piernaIzqFemenino.obj");
 
+	// --- CARGA DEL MODELO MASCULINO ---
+	Model cabezaMasculino((char*)"Models/visitanteMasculino/cabezaMasculino.obj");
+	Model brazoDerMasculino((char*)"Models/visitanteMasculino/brazoDerMasculino.obj");
+	Model brazoIzqMasculino((char*)"Models/visitanteMasculino/brazoIzqMasculino.obj");
+	Model piernaDerMasculino((char*)"Models/visitanteMasculino/piernaDerMasculino.obj");
+	Model torsoMasculino((char*)"Models/visitanteMasculino/torsoMasculino.obj");
+	Model piernaIzqMasculino((char*)"Models/visitanteMasculino/piernaIzqMasculino.obj");
+
 
 	// Setup VAO and VBO for the light cube
 	GLuint VBO, VAO;
@@ -698,6 +715,62 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		piernaIzqFemenino.Draw(lightingShader);
 		// ----------------------------------------------------
+
+		// --- DIBUJADO DEL VISITANTE MASCULINO ---
+		glm::mat4 baseModelMas = glm::mat4(1.0f);
+
+		// 1. Posición ajustable desde las variables globales
+		baseModelMas = glm::translate(baseModelMas, glm::vec3(visMasPosX, visMasPosY, visMasPosZ));
+
+		// 2. Pivote central del hombre (para evitar teletransportación)
+		glm::vec3 pivotCentroMas(-7.8431f, 0.0f, -11.5270f);
+		baseModelMas = glm::translate(baseModelMas, pivotCentroMas);
+		baseModelMas = glm::rotate(baseModelMas, glm::radians(rotVisMas), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModelMas = glm::translate(baseModelMas, -pivotCentroMas);
+
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+
+		// Cabeza y Torso
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelMas));
+		cabezaMasculino.Draw(lightingShader);
+		torsoMasculino.Draw(lightingShader); 
+
+		// Brazo Derecho
+		model = baseModelMas;
+		glm::vec3 pivotBDMas(-7.4376f, 3.6748f, -11.4620f);
+		model = glm::translate(model, pivotBDMas);
+		model = glm::rotate(model, glm::radians(R_Arm_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBDMas);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerMasculino.Draw(lightingShader);
+
+		// Brazo Izquierdo
+		model = baseModelMas;
+		glm::vec3 pivotBIMas(-8.2487f, 3.6743f, -11.4460f);
+		model = glm::translate(model, pivotBIMas);
+		model = glm::rotate(model, glm::radians(L_Arm_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBIMas);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqMasculino.Draw(lightingShader);
+
+		// Pierna Derecha
+		model = baseModelMas;
+		glm::vec3 pivotPDMas(-7.5539f, 2.8185f, -11.5980f);
+		model = glm::translate(model, pivotPDMas);
+		model = glm::rotate(model, glm::radians(R_Leg_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPDMas);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerMasculino.Draw(lightingShader);
+
+		// Pierna Izquierda
+		model = baseModelMas;
+		glm::vec3 pivotPIMas(-8.1341f, 2.8189f, -11.5870f);
+		model = glm::translate(model, pivotPIMas);
+		model = glm::rotate(model, glm::radians(L_Leg_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPIMas);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); 
+		piernaIzqMasculino.Draw(lightingShader); 
+		// ----------------------------------------
 
 		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
 
