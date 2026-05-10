@@ -16,7 +16,7 @@
 #include <vector>
 #include <string>
 
-// GLEW
+   // GLEW
 #include <GL/glew.h>
 
 // GLFW
@@ -123,7 +123,7 @@ void Animation() {
 				playIndex = 0;
 				resetElements();
 				interpolation();
-				i_curr_steps = 0; 
+				i_curr_steps = 0;
 			}
 			else {
 				i_curr_steps = 0;
@@ -386,6 +386,7 @@ int main()
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
+	Shader flagShader("Shader/flag_wave.vs", "Shader/lighting.frag");
 
 	// --- Configuración e Inicialización de Skybox ---
 	Shader skyboxShader("Shader/SkyBox.vs", "Shader/SkyBox.frag");
@@ -428,6 +429,7 @@ int main()
 	Model stand3((char*)"Models/stands/stand2_4x2.obj");
 	Model tubo((char*)"Models/banner/tubo_banner.obj");
 	Model banner((char*)"Models/banner/banner.obj");
+	Model banderaFlag((char*)"Models/banderas/bandera_.obj");
 
 	// --- CARGA DEL MODELO FEMENINO ---
 	Model cabezaFemenino((char*)"Models/visitanteFemenino/cabezaFemenino.obj");
@@ -456,6 +458,10 @@ int main()
 	lightingShader.Use();
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
+
+	flagShader.Use();
+	glUniform1i(glGetUniformLocation(flagShader.Program, "material.diffuse"), 0);
+	glUniform1i(glGetUniformLocation(flagShader.Program, "material.specular"), 1);
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
 
@@ -732,10 +738,83 @@ int main()
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			banner.Draw(lightingShader);
 		}
-
-
-
 		// ----------------------------------------
+
+		// ====================================================================
+		// BANDERA PUBLICITARIA - Deformacion Procedimental de Vertices 
+		// ====================================================================
+		flagShader.Use();
+		{
+			GLuint fp = flagShader.Program;
+
+			// --- Iluminacion (reutiliza valores ya calculados en este frame) ---
+			glUniform3f(glGetUniformLocation(fp, "viewPos"),
+				camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+
+			glUniform3f(glGetUniformLocation(fp, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+			glUniform3f(glGetUniformLocation(fp, "dirLight.ambient"), dirAmb.r, dirAmb.g, dirAmb.b);
+			glUniform3f(glGetUniformLocation(fp, "dirLight.diffuse"), dirDif.r, dirDif.g, dirDif.b);
+			glUniform3f(glGetUniformLocation(fp, "dirLight.specular"), dirSpc.r, dirSpc.g, dirSpc.b);
+
+			glUniform3f(glGetUniformLocation(fp, "pointLights[0].position"),
+				pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+			glUniform3f(glGetUniformLocation(fp, "pointLights[0].ambient"), ptAmb.r, ptAmb.g, ptAmb.b);
+			glUniform3f(glGetUniformLocation(fp, "pointLights[0].diffuse"), ptDif.r, ptDif.g, ptDif.b);
+			glUniform3f(glGetUniformLocation(fp, "pointLights[0].specular"), ptSpc.r, ptSpc.g, ptSpc.b);
+			glUniform1f(glGetUniformLocation(fp, "pointLights[0].constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(fp, "pointLights[0].linear"), 0.045f);
+			glUniform1f(glGetUniformLocation(fp, "pointLights[0].quadratic"), 0.075f);
+
+			glUniform3f(glGetUniformLocation(fp, "spotLight.position"),
+				camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+			glUniform3f(glGetUniformLocation(fp, "spotLight.direction"),
+				camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
+			glUniform3f(glGetUniformLocation(fp, "spotLight.ambient"), 0.2f, 0.2f, 0.8f);
+			glUniform3f(glGetUniformLocation(fp, "spotLight.diffuse"), 0.2f, 0.2f, 0.8f);
+			glUniform3f(glGetUniformLocation(fp, "spotLight.specular"), 0.0f, 0.0f, 0.0f);
+			glUniform1f(glGetUniformLocation(fp, "spotLight.constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(fp, "spotLight.linear"), 0.3f);
+			glUniform1f(glGetUniformLocation(fp, "spotLight.quadratic"), 0.7f);
+			glUniform1f(glGetUniformLocation(fp, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
+			glUniform1f(glGetUniformLocation(fp, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
+
+			for (int i = 0; i < 9; i++) {
+				std::string b = "roofLights[" + std::to_string(i) + "].";
+				glUniform3f(glGetUniformLocation(fp, (b + "position").c_str()),
+					roofLightPositions[i].x, roofLightPositions[i].y, roofLightPositions[i].z);
+				glUniform3f(glGetUniformLocation(fp, (b + "direction").c_str()), 0.0f, -1.0f, 0.0f);
+				glUniform3f(glGetUniformLocation(fp, (b + "ambient").c_str()), 0.1f, 0.1f, 0.1f);
+				glUniform3f(glGetUniformLocation(fp, (b + "diffuse").c_str()), roofDif.r, roofDif.g, roofDif.b);
+				glUniform3f(glGetUniformLocation(fp, (b + "specular").c_str()), roofDif.r, roofDif.g, roofDif.b);
+				glUniform1f(glGetUniformLocation(fp, (b + "constant").c_str()), 1.0f);
+				glUniform1f(glGetUniformLocation(fp, (b + "linear").c_str()), 0.007f);
+				glUniform1f(glGetUniformLocation(fp, (b + "quadratic").c_str()), 0.0002f);
+				glUniform1f(glGetUniformLocation(fp, (b + "cutOff").c_str()), glm::cos(glm::radians(45.0f)));
+				glUniform1f(glGetUniformLocation(fp, (b + "outerCutOff").c_str()), glm::cos(glm::radians(65.0f)));
+			}
+
+			glUniform1f(glGetUniformLocation(fp, "material.shininess"), 32.0f);
+
+			// --- Matrices de transformacion ---
+			glUniformMatrix4fv(glGetUniformLocation(fp, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(fp, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+			glm::mat4 flagModel(1);
+			glUniformMatrix4fv(glGetUniformLocation(fp, "model"), 1, GL_FALSE, glm::value_ptr(flagModel));
+			glUniform1i(glGetUniformLocation(fp, "transparency"), 0);
+
+			// --- Parametros de onda ---
+			// Z(x,t) = A * sin(k*x - omega*t) * weight(x)
+			glUniform1f(glGetUniformLocation(fp, "time"), currentFrame);
+			glUniform1f(glGetUniformLocation(fp, "waveAmp"), 0.08f);   
+			glUniform1f(glGetUniformLocation(fp, "waveK"), 6.2832f); 
+			glUniform1f(glGetUniformLocation(fp, "waveOmega"), 2.5f);    
+			glUniform1f(glGetUniformLocation(fp, "flagXMin"), -10.4387f); 
+			glUniform1f(glGetUniformLocation(fp, "flagWidth"), 1.0f);      
+			glUniform1f(glGetUniformLocation(fp, "flagZ"), -39.1548f); 
+
+			banderaFlag.Draw(flagShader);
+		}
+		// ====================================================================
 
 
 		// Draw the lamp object
@@ -827,7 +906,6 @@ void DoMovement()
 // Is called whenever a key is pressed/released via GLFW
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	// Tecla R para reiniciar y lanzar la animación del cartel
 	// Tecla R para alternar (abrir/cerrar) el cartel
 	if (key == GLFW_KEY_R && action == GLFW_PRESS)
 	{
