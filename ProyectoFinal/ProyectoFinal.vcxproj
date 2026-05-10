@@ -142,6 +142,7 @@
     <ClCompile Include="Proyecto_Final.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\flag_wave.vs" />
     <None Include="Shader\lamp.frag" />
     <None Include="Shader\lamp.vs" />
     <None Include="Shader\lighting.frag" />

@@ -430,6 +430,8 @@ int main()
 	Model tubo((char*)"Models/banner/tubo_banner.obj");
 	Model banner((char*)"Models/banner/banner.obj");
 	Model banderaFlag((char*)"Models/banderas/bandera_.obj");
+	Model banderaUnam((char*)"Models/banderas/banderaunamaerodesign.obj");
+	Model banderaCisco((char*)"Models/banderas/banderacisco.obj");
 
 	// --- CARGA DEL MODELO FEMENINO ---
 	Model cabezaFemenino((char*)"Models/visitanteFemenino/cabezaFemenino.obj");
@@ -805,14 +807,48 @@ int main()
 			// --- Parametros de onda ---
 			// Z(x,t) = A * sin(k*x - omega*t) * weight(x)
 			glUniform1f(glGetUniformLocation(fp, "time"), currentFrame);
-			glUniform1f(glGetUniformLocation(fp, "waveAmp"), 0.08f);   
-			glUniform1f(glGetUniformLocation(fp, "waveK"), 6.2832f); 
-			glUniform1f(glGetUniformLocation(fp, "waveOmega"), 2.5f);    
-			glUniform1f(glGetUniformLocation(fp, "flagXMin"), -10.4387f); 
-			glUniform1f(glGetUniformLocation(fp, "flagWidth"), 1.0f);      
-			glUniform1f(glGetUniformLocation(fp, "flagZ"), -39.1548f); 
+			glUniform1f(glGetUniformLocation(fp, "waveAmp"), 0.18f);
+			glUniform1f(glGetUniformLocation(fp, "waveK"), 9.4248f);
+			glUniform1f(glGetUniformLocation(fp, "waveOmega"), 2.5f);
+			glUniform1f(glGetUniformLocation(fp, "flagXMin"), -0.986661f);
+			glUniform1f(glGetUniformLocation(fp, "flagWidth"), 1.0f);
+			glUniform1f(glGetUniformLocation(fp, "flagZ"), -40.908188f);
 
 			banderaFlag.Draw(flagShader);
+			// ---- Segunda bandera (UNAM Aero Design) ----
+			{
+				GLuint fp = flagShader.Program;
+
+				glm::mat4 flagModel2(1);
+				glUniformMatrix4fv(glGetUniformLocation(fp, "model"), 1, GL_FALSE, glm::value_ptr(flagModel2));
+
+				glUniform1f(glGetUniformLocation(fp, "time"), currentFrame);
+				glUniform1f(glGetUniformLocation(fp, "waveAmp"), 0.18f);
+				glUniform1f(glGetUniformLocation(fp, "waveK"), 9.4248f);
+				glUniform1f(glGetUniformLocation(fp, "waveOmega"), 2.5f);
+				glUniform1f(glGetUniformLocation(fp, "flagXMin"), -14.168542f);
+				glUniform1f(glGetUniformLocation(fp, "flagWidth"), 1.0f);
+				glUniform1f(glGetUniformLocation(fp, "flagZ"), -40.908188f);
+
+				banderaUnam.Draw(flagShader);
+			}
+			{
+			// ---- Tercera bandera (Cisco) ----
+			GLuint fp = flagShader.Program;
+
+			glm::mat4 flagModel2(1);
+			glUniformMatrix4fv(glGetUniformLocation(fp, "model"), 1, GL_FALSE, glm::value_ptr(flagModel2));
+
+			glUniform1f(glGetUniformLocation(fp, "time"), currentFrame);
+			glUniform1f(glGetUniformLocation(fp, "waveAmp"), 0.18f);
+			glUniform1f(glGetUniformLocation(fp, "waveK"), 9.4248f);
+			glUniform1f(glGetUniformLocation(fp, "waveOmega"), 2.5f);
+			glUniform1f(glGetUniformLocation(fp, "flagXMin"), -11.088256f);
+			glUniform1f(glGetUniformLocation(fp, "flagWidth"), -0.997640f);
+			glUniform1f(glGetUniformLocation(fp, "flagZ"), -15.008704f);
+
+			banderaCisco.Draw(flagShader);
+			}
 		}
 		// ====================================================================
 
