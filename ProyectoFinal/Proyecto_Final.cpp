@@ -26,6 +26,112 @@
 #include "Camera.h"
 #include "Model.h"
 
+// --- SISTEMA DE REPRODUCCIÓN DE KEYFRAMES (VISITANTE) ---
+#include <fstream>
+#include <sstream>
+
+float visPosX = 0.0f, visPosY = 0.0f, visPosZ = 0.0f; // Posición en el lobby
+float rotVis = 0.0f; // Rotación del cuerpo entero
+
+float R_Arm = 0.0f; // Brazo Derecho
+float L_Arm = 0.0f; // Brazo Izquierdo
+float R_Leg = 0.0f; // Pierna Derecha
+float L_Leg = 0.0f; // Pierna Izquierda
+
+#define MAX_FRAMES 100 
+int i_max_steps = 40;
+int i_curr_steps = 0;
+
+typedef struct _frame {
+	float visPosX, visPosY, visPosZ;
+	float incX, incY, incZ;
+	float rotVis, rotVisInc;
+	float R_Arm, R_ArmInc;
+	float L_Arm, L_ArmInc;
+	float R_Leg, R_LegInc;
+	float L_Leg, L_LegInc;
+} FRAME;
+
+FRAME KeyFrame[MAX_FRAMES];
+int FrameIndex = 0;
+bool play = false;
+int playIndex = 0;
+
+void resetElements(void) {
+	visPosX = KeyFrame[0].visPosX;
+	visPosY = KeyFrame[0].visPosY;
+	visPosZ = KeyFrame[0].visPosZ;
+	rotVis = KeyFrame[0].rotVis;
+	R_Arm = KeyFrame[0].R_Arm;
+	L_Arm = KeyFrame[0].L_Arm;
+	R_Leg = KeyFrame[0].R_Leg;
+	L_Leg = KeyFrame[0].L_Leg;
+}
+
+void interpolation(void) {
+	KeyFrame[playIndex].incX = (KeyFrame[playIndex + 1].visPosX - KeyFrame[playIndex].visPosX) / i_max_steps;
+	KeyFrame[playIndex].incY = (KeyFrame[playIndex + 1].visPosY - KeyFrame[playIndex].visPosY) / i_max_steps;
+	KeyFrame[playIndex].incZ = (KeyFrame[playIndex + 1].visPosZ - KeyFrame[playIndex].visPosZ) / i_max_steps;
+	KeyFrame[playIndex].rotVisInc = (KeyFrame[playIndex + 1].rotVis - KeyFrame[playIndex].rotVis) / i_max_steps;
+	KeyFrame[playIndex].R_ArmInc = (KeyFrame[playIndex + 1].R_Arm - KeyFrame[playIndex].R_Arm) / i_max_steps;
+	KeyFrame[playIndex].L_ArmInc = (KeyFrame[playIndex + 1].L_Arm - KeyFrame[playIndex].L_Arm) / i_max_steps;
+	KeyFrame[playIndex].R_LegInc = (KeyFrame[playIndex + 1].R_Leg - KeyFrame[playIndex].R_Leg) / i_max_steps;
+	KeyFrame[playIndex].L_LegInc = (KeyFrame[playIndex + 1].L_Leg - KeyFrame[playIndex].L_Leg) / i_max_steps;
+}
+
+void loadAnimationFromFile(void) {
+	std::ifstream file("animacion_visitante.txt");
+	if (file.is_open()) {
+		file >> FrameIndex;
+		for (int i = 0; i < FrameIndex; i++) {
+			file >> KeyFrame[i].visPosX >> KeyFrame[i].visPosY >> KeyFrame[i].visPosZ
+				>> KeyFrame[i].rotVis >> KeyFrame[i].R_Arm >> KeyFrame[i].L_Arm
+				>> KeyFrame[i].R_Leg >> KeyFrame[i].L_Leg;
+		}
+		file.close();
+		printf("Animacion preguardada cargada, Total frames: %d\n", FrameIndex);
+		if (FrameIndex > 1) {
+			resetElements();
+			interpolation();
+			play = true; // Se pone en true para que arranque solita
+			playIndex = 0;
+			i_curr_steps = 0;
+		}
+	}
+	else {
+		printf("No se encontro animacion_visitante.txt.\n");
+	}
+}
+
+void Animation() {
+	if (play) {
+		if (i_curr_steps >= i_max_steps) {
+			playIndex++;
+			if (playIndex > FrameIndex - 2) {
+				playIndex = 0;
+				resetElements();
+				interpolation();
+				i_curr_steps = 0; 
+			}
+			else {
+				i_curr_steps = 0;
+				interpolation();
+			}
+		}
+		else {
+			visPosX += KeyFrame[playIndex].incX;
+			visPosY += KeyFrame[playIndex].incY;
+			visPosZ += KeyFrame[playIndex].incZ;
+			rotVis += KeyFrame[playIndex].rotVisInc;
+			R_Arm += KeyFrame[playIndex].R_ArmInc;
+			L_Arm += KeyFrame[playIndex].L_ArmInc;
+			R_Leg += KeyFrame[playIndex].R_LegInc;
+			L_Leg += KeyFrame[playIndex].L_LegInc;
+			i_curr_steps++;
+		}
+	}
+}
+
 // Function prototypes
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -341,6 +447,9 @@ int main()
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
 
+	// Cargar la animación del visitante al inicio
+	loadAnimationFromFile();
+
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -351,6 +460,7 @@ int main()
 
 		glfwPollEvents();
 		DoMovement();
+		Animation();
 
 		// --- Sistema Dinamico Dia / Noche : interpolacion suave ---
 		float targetFactor = dayMode ? 1.0f : 0.0f;
@@ -513,19 +623,61 @@ int main()
 		stand3.Draw(lightingShader);
 		// -------------------------------
 
-		// --- DIBUJADO DEL MODELO FEMENINO ---
-		// Como ya vienen con las coordenadas desde Blender, solo usamos una matriz identidad.
-		model = glm::mat4(1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0); 
-		cabezaFemenino.Draw(lightingShader);
-		brazoDerFemenino.Draw(lightingShader);
-		brazoIzqFemenino.Draw(lightingShader);
-		piernaDerFemenino.Draw(lightingShader);
-		torsoFemenino.Draw(lightingShader);
-		piernaIzqFemenino.Draw(lightingShader);
-		// ------------------------------------
+		// --- DIBUJADO DEL VISITANTE ANIMADO POR KEYFRAMES ---
+		glm::mat4 baseModel = glm::mat4(1.0f);
 
+		// 1. Aplicamos el desplazamiento del recorrido (Caminata del Keyframe)
+		baseModel = glm::translate(baseModel, glm::vec3(visPosX, visPosY, visPosZ));
+
+		// 2. Rotar sobre su propio centro
+		glm::vec3 pivotCentro(-4.2f, 0.0f, -11.5f); // Centro de gravedad de tu modelo
+		baseModel = glm::translate(baseModel, pivotCentro);
+		baseModel = glm::rotate(baseModel, glm::radians(rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModel = glm::translate(baseModel, -pivotCentro);
+
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+
+		// Cabeza y Torso
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModel));
+		cabezaFemenino.Draw(lightingShader);
+		torsoFemenino.Draw(lightingShader);
+
+		// Brazo Derecho
+		model = baseModel;
+		glm::vec3 pivotBrazoDer(-3.8167f, 3.5118f, -11.4444f);
+		model = glm::translate(model, pivotBrazoDer);
+		model = glm::rotate(model, glm::radians(R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoDer);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerFemenino.Draw(lightingShader);
+
+		// Brazo Izquierdo
+		model = baseModel;
+		glm::vec3 pivotBrazoIzq(-4.5887f, 3.5097f, -11.4444f);
+		model = glm::translate(model, pivotBrazoIzq);
+		model = glm::rotate(model, glm::radians(L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoIzq);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqFemenino.Draw(lightingShader);
+
+		// Pierna Derecha
+		model = baseModel;
+		glm::vec3 pivotPiernaDer(-3.8924f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaDer);
+		model = glm::rotate(model, glm::radians(R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaDer);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerFemenino.Draw(lightingShader);
+
+		// Pierna Izquierda
+		model = baseModel;
+		glm::vec3 pivotPiernaIzq(-4.5216f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaIzq);
+		model = glm::rotate(model, glm::radians(L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaIzq);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaIzqFemenino.Draw(lightingShader);
+		// ----------------------------------------------------
 
 		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
 
