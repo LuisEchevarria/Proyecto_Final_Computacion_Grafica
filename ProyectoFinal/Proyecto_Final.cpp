@@ -1,3 +1,15 @@
+/* ==========================================================================
+   PROYECTO FINAL - CONJUNTO NORTE
+   Equipo 6
+   ==========================================================================
+   Integrantes:
+   - Echeverria Aguilar Luis Angel      (320236235)
+   - Jacinto Robledo Valeria Berenice   (320057973)
+   - Camarena Arevalo Yael Eduardo      (318279864)
+
+   Fecha de entrega: 13/06/2026
+   ========================================================================== */
+
 #include <iostream>
 #include <cmath>
 #include <algorithm>
@@ -142,7 +154,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera  camera(glm::vec3(-5.0f, 3.3f, 5.0f));
+Camera  camera(glm::vec3(-6.0f, 3.3f, -15.0f));
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -233,7 +245,7 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 
 // --- Variables para la animación del Roll-up ---
 float animProgress = 0.0f;
-bool animActive = false;
+bool bannerOpen = false;
 const float ALTURA_LONA = 0.3f;
 
 // --- Skybox ---
@@ -688,17 +700,22 @@ int main()
 		tubo.Draw(lightingShader);
 
 		// LÓGICA Y DIBUJO DE LA LONA
-
-		// Solo se calcula y dibuja la lona si la animación ya inició
-		if (animActive) {
-
+		//abierto / cerrado
+		if (bannerOpen) {
 			if (animProgress < 1.0f) {
-				animProgress += deltaTime * 1.0f;
+				animProgress += deltaTime * 1.0f; // Velocidad de caída
 				if (animProgress > 1.0f) animProgress = 1.0f;
 			}
+		}
+		else {
+			if (animProgress > 0.0f) {
+				animProgress -= deltaTime * 1.5f; // Sube un poco más rápido de lo que cae
+				if (animProgress < 0.0f) animProgress = 0.0f;
+			}
+		}
 
+		if (animProgress > 0.0f) {
 			float Sy = easeOutBack(animProgress);
-
 			if (Sy < 0.001f) Sy = 0.001f;
 
 			float Y_TUBO = 4.88f;
@@ -715,6 +732,9 @@ int main()
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			banner.Draw(lightingShader);
 		}
+
+
+
 		// ----------------------------------------
 
 
@@ -808,10 +828,10 @@ void DoMovement()
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	// Tecla R para reiniciar y lanzar la animación del cartel
-	if (keys[GLFW_KEY_R])
+	// Tecla R para alternar (abrir/cerrar) el cartel
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
 	{
-		animActive = true;
-		animProgress = 0.0f; // Reinicia el contador para verla desde el principio
+		bannerOpen = !bannerOpen; // Invierte el estado actual
 	}
 
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
