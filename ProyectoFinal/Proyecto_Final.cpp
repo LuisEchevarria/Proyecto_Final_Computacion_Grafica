@@ -281,7 +281,23 @@ glm::vec3 roofLightPositions[] = {
 	glm::vec3(-16.172f, 8.333f, -28.010f), // P6
 	glm::vec3(5.106f, 8.333f, -39.312f), // P7
 	glm::vec3(-5.503f, 8.333f, -39.312f), // P8
-	glm::vec3(-16.172f, 8.333f, -39.312f)  // P9
+	glm::vec3(-16.172f, 8.333f, -39.312f), // P9
+	glm::vec3(-25.023f, 8.333f, -17.342f), // P10
+	glm::vec3(-27.782f, 8.333f, -17.342f), // P11
+	glm::vec3(-31.077f, 8.333f, -17.342f), // P12
+	glm::vec3(-34.741f, 8.333f, -17.342f), // P13
+	glm::vec3(-38.167f, 8.333f, -17.342f), // P14
+	glm::vec3(-38.167f, 8.333f, -20.209f), // P15
+	glm::vec3(-38.167f, 8.333f, -23.139f), // P16
+	glm::vec3(-38.167f, 8.333f, -26.054f), // P17
+	glm::vec3(-38.167f, 8.333f, -29.136f), // P18
+	glm::vec3(-38.167f, 8.333f, -39.762f), // P19
+	glm::vec3(-34.741f, 8.333f, -39.762f), // P20
+	glm::vec3(-31.077f, 8.333f, -39.762f), // P21
+	glm::vec3(-27.782f, 8.333f, -39.762f), // P22
+	glm::vec3(-25.023f, 8.333f, -39.762f), // P23
+	glm::vec3(-38.167f, 8.333f, -32.170f), // P24
+	glm::vec3(-38.167f, 8.333f, -35.937f)  // P25
 };
 
 float vertices[] = {
@@ -519,6 +535,7 @@ int main()
 	Model stand2((char*)"Models/stands/stand1_4x2.obj");
 	Model stand3((char*)"Models/stands/stand2_4x2.obj");
 	Model tubo((char*)"Models/banner/tubo_banner.obj");
+	Model lamparas((char*)"Models/lamparas/Lamparas.obj");
 	Model banner((char*)"Models/banner/banner.obj");
 	Model banderaFlag((char*)"Models/banderas/bandera_.obj");
 	Model banderaUnam((char*)"Models/banderas/banderaunamaerodesign.obj");
@@ -557,10 +574,12 @@ int main()
 
 	// Set texture units
 	lightingShader.Use();
+	glUniform1f(glGetUniformLocation(lightingShader.Program, "emissive"), 0.0f);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
 	flagShader.Use();
+	glUniform1f(glGetUniformLocation(flagShader.Program, "emissive"), 0.0f);
 	glUniform1i(glGetUniformLocation(flagShader.Program, "material.diffuse"), 0);
 	glUniform1i(glGetUniformLocation(flagShader.Program, "material.specular"), 1);
 
@@ -678,7 +697,7 @@ int main()
 		glm::vec3 nightRoofDif(2.5f, 2.3f, 2.0f);
 		glm::vec3 roofDif = glm::mix(nightRoofDif, dayRoofDif, dayFactor);
 
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 25; i++) {
 			std::string base = "roofLights[" + std::to_string(i) + "].";
 			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "position").c_str()), roofLightPositions[i].x, roofLightPositions[i].y, roofLightPositions[i].z);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "direction").c_str()), 0.0f, -1.0f, 0.0f); // Apuntan hacia abajo
@@ -743,6 +762,22 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		stand3.Draw(lightingShader);
+
+		// --- DIBUJADO DE LAS LAMPARAS ---
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+
+		float lampEmissive = (1.0f - dayFactor) * 1.8f;
+
+		if (active) lampEmissive = 1.8f;
+
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "emissive"), lampEmissive);
+		lamparas.Draw(lightingShader);
+
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "emissive"), 0.0f);
 		// -------------------------------
 
 		// --- DIBUJADO DEL VISITANTE ANIMADO POR KEYFRAMES ---
