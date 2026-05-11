@@ -78,6 +78,13 @@ int FrameIndex = 0;
 bool play = false;
 int playIndex = 0;
 
+// --- SISTEMA DE REPRODUCCIÓN (VISITANTE MASCULINO) ---
+FRAME KeyFrameMas[MAX_FRAMES];
+int FrameIndexMas = 0;
+bool playMas = false;
+int playIndexMas = 0;
+int i_curr_steps_mas = 0;
+
 void resetElements(void) {
 	visPosX = KeyFrame[0].visPosX;
 	visPosY = KeyFrame[0].visPosY;
@@ -149,6 +156,81 @@ void Animation() {
 			R_Leg += KeyFrame[playIndex].R_LegInc;
 			L_Leg += KeyFrame[playIndex].L_LegInc;
 			i_curr_steps++;
+		}
+	}
+}
+
+void resetElementsMas(void) {
+	visMasPosX = KeyFrameMas[0].visPosX;
+	visMasPosY = KeyFrameMas[0].visPosY;
+	visMasPosZ = KeyFrameMas[0].visPosZ;
+	rotVisMas = KeyFrameMas[0].rotVis;
+	R_Arm_Mas = KeyFrameMas[0].R_Arm;
+	L_Arm_Mas = KeyFrameMas[0].L_Arm;
+	R_Leg_Mas = KeyFrameMas[0].R_Leg;
+	L_Leg_Mas = KeyFrameMas[0].L_Leg;
+}
+
+void interpolationMas(void) {
+	KeyFrameMas[playIndexMas].incX = (KeyFrameMas[playIndexMas + 1].visPosX - KeyFrameMas[playIndexMas].visPosX) / i_max_steps;
+	KeyFrameMas[playIndexMas].incY = (KeyFrameMas[playIndexMas + 1].visPosY - KeyFrameMas[playIndexMas].visPosY) / i_max_steps;
+	KeyFrameMas[playIndexMas].incZ = (KeyFrameMas[playIndexMas + 1].visPosZ - KeyFrameMas[playIndexMas].visPosZ) / i_max_steps;
+	KeyFrameMas[playIndexMas].rotVisInc = (KeyFrameMas[playIndexMas + 1].rotVis - KeyFrameMas[playIndexMas].rotVis) / i_max_steps;
+	KeyFrameMas[playIndexMas].R_ArmInc = (KeyFrameMas[playIndexMas + 1].R_Arm - KeyFrameMas[playIndexMas].R_Arm) / i_max_steps;
+	KeyFrameMas[playIndexMas].L_ArmInc = (KeyFrameMas[playIndexMas + 1].L_Arm - KeyFrameMas[playIndexMas].L_Arm) / i_max_steps;
+	KeyFrameMas[playIndexMas].R_LegInc = (KeyFrameMas[playIndexMas + 1].R_Leg - KeyFrameMas[playIndexMas].R_Leg) / i_max_steps;
+	KeyFrameMas[playIndexMas].L_LegInc = (KeyFrameMas[playIndexMas + 1].L_Leg - KeyFrameMas[playIndexMas].L_Leg) / i_max_steps;
+}
+
+void loadAnimationFromFileMas(void) {
+	std::ifstream file("animacion_masculino.txt");
+	if (file.is_open()) {
+		file >> FrameIndexMas;
+		for (int i = 0; i < FrameIndexMas; i++) {
+			file >> KeyFrameMas[i].visPosX >> KeyFrameMas[i].visPosY >> KeyFrameMas[i].visPosZ
+				>> KeyFrameMas[i].rotVis >> KeyFrameMas[i].R_Arm >> KeyFrameMas[i].L_Arm
+				>> KeyFrameMas[i].R_Leg >> KeyFrameMas[i].L_Leg;
+		}
+		file.close();
+		printf("¡Animacion MASCULINA cargada! Total frames: %d\n", FrameIndexMas);
+		if (FrameIndexMas > 1) {
+			resetElementsMas();
+			interpolationMas();
+			playMas = true;
+			playIndexMas = 0;
+			i_curr_steps_mas = 0;
+		}
+	}
+	else {
+		printf("No se encontro animacion_masculino.txt.\n");
+	}
+}
+
+void AnimationMas() {
+	if (playMas) {
+		if (i_curr_steps_mas >= i_max_steps) {
+			playIndexMas++;
+			if (playIndexMas > FrameIndexMas - 2) {
+				playIndexMas = 0;
+				resetElementsMas();
+				interpolationMas();
+				i_curr_steps_mas = 0;
+			}
+			else {
+				i_curr_steps_mas = 0;
+				interpolationMas();
+			}
+		}
+		else {
+			visMasPosX += KeyFrameMas[playIndexMas].incX;
+			visMasPosY += KeyFrameMas[playIndexMas].incY;
+			visMasPosZ += KeyFrameMas[playIndexMas].incZ;
+			rotVisMas += KeyFrameMas[playIndexMas].rotVisInc;
+			R_Arm_Mas += KeyFrameMas[playIndexMas].R_ArmInc;
+			L_Arm_Mas += KeyFrameMas[playIndexMas].L_ArmInc;
+			R_Leg_Mas += KeyFrameMas[playIndexMas].R_LegInc;
+			L_Leg_Mas += KeyFrameMas[playIndexMas].L_LegInc;
+			i_curr_steps_mas++;
 		}
 	}
 }
@@ -487,6 +569,8 @@ int main()
 	// Cargar la animación del visitante al inicio
 	loadAnimationFromFile();
 
+	loadAnimationFromFileMas();
+
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -498,6 +582,7 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 		Animation();
+		AnimationMas();
 
 		// --- Sistema Dinamico Dia / Noche : interpolacion suave ---
 		float targetFactor = dayMode ? 1.0f : 0.0f;
