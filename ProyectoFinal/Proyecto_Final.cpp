@@ -540,6 +540,7 @@ int main()
 	Model banderaFlag((char*)"Models/banderas/bandera_.obj");
 	Model banderaUnam((char*)"Models/banderas/banderaunamaerodesign.obj");
 	Model banderaCisco((char*)"Models/banderas/banderacisco.obj");
+	Model tomacorriente((char*)"Models/senalizacion de corriente/Tomacorriente.obj");
 
 	// --- CARGA DEL MODELO FEMENINO ---
 	Model cabezaFemenino((char*)"Models/visitanteFemenino/cabezaFemenino.obj");
@@ -778,6 +779,15 @@ int main()
 		lamparas.Draw(lightingShader);
 
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "emissive"), 0.0f);
+		// -------------------------------
+
+		// --- DIBUJADO DE LA SEÑALIZACIÓN DE LA CORRIENTE ---
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		tomacorriente.Draw(lightingShader);
 		// -------------------------------
 
 		// --- DIBUJADO DEL VISITANTE ANIMADO POR KEYFRAMES ---
