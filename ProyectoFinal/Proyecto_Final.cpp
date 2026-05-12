@@ -983,7 +983,7 @@ int main()
 			glUniform1f(glGetUniformLocation(fp, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
 			glUniform1f(glGetUniformLocation(fp, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
 
-			for (int i = 0; i < 9; i++) {
+			for (int i = 0; i < 25; i++) {
 				std::string b = "roofLights[" + std::to_string(i) + "].";
 				glUniform3f(glGetUniformLocation(fp, (b + "position").c_str()),
 					roofLightPositions[i].x, roofLightPositions[i].y, roofLightPositions[i].z);
