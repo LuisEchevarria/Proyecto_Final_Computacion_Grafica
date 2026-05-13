@@ -61,6 +61,7 @@ uniform SpotLight roofLights[25];
 uniform Material material;
 uniform int transparency;
 uniform float emissive;
+uniform float dayFactor;   // <-- NUEVO: 1.0 dia, 0.0 noche
 
 // Function prototypes
 vec3 CalcDirLight( DirLight light, vec3 normal, vec3 viewDir );
@@ -94,6 +95,14 @@ void main( )
     // Emisión (auto-iluminación): cuando emissive > 0, el modelo brilla
     // sin depender de las luces de la escena. Para las lámparas encendidas.
     result += vec3( texture( material.diffuse, TexCoords ) ) * emissive;
+
+    // Reinhard tone mapping SOLO de noche: evita que el suelo se sature
+    // por el solape de los 25 focos. De dia (dayFactor=1) la iluminacion
+    // queda intacta.
+    vec3 knee    = vec3(0.88);
+    vec3 ceiling = vec3(0.97);
+    vec3 over = max(result - knee, vec3(0.0));
+    result = min(result, knee) + (ceiling - knee) * over / (over + (ceiling - knee));
  	
     color = vec4( result,texture(material.diffuse, TexCoords).rgb );
 	  if(color.a < 0.1 && transparency==1)

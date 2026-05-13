@@ -381,32 +381,33 @@ glm::vec3 pointLightPositions[] = {
 };
 
 // Positions of the roof lights (Ceiling lights)
+// Coordenadas tomadas del centro exacto de cada malla en Lamparas.obj
 glm::vec3 roofLightPositions[] = {
-	glm::vec3(5.106f, 8.333f, -17.050f), // P1
-	glm::vec3(-5.503f, 8.333f, -17.050f), // P2
-	glm::vec3(-16.172f, 8.333f, -17.050f), // P3
-	glm::vec3(5.106f, 8.333f, -28.010f), // P4
-	glm::vec3(-5.503f, 8.333f, -28.010f), // P5
-	glm::vec3(-16.172f, 8.333f, -28.010f), // P6
-	glm::vec3(5.106f, 8.333f, -39.312f), // P7
-	glm::vec3(-5.503f, 8.333f, -39.312f), // P8
-	glm::vec3(-16.172f, 8.333f, -39.312f), // P9
-	glm::vec3(-25.023f, 8.333f, -17.342f), // P10
-	glm::vec3(-27.782f, 8.333f, -17.342f), // P11
-	glm::vec3(-31.077f, 8.333f, -17.342f), // P12
-	glm::vec3(-34.741f, 8.333f, -17.342f), // P13
-	glm::vec3(-38.167f, 8.333f, -17.342f), // P14
-	glm::vec3(-38.167f, 8.333f, -20.209f), // P15
-	glm::vec3(-38.167f, 8.333f, -23.139f), // P16
-	glm::vec3(-38.167f, 8.333f, -26.054f), // P17
-	glm::vec3(-38.167f, 8.333f, -29.136f), // P18
-	glm::vec3(-38.167f, 8.333f, -39.762f), // P19
-	glm::vec3(-34.741f, 8.333f, -39.762f), // P20
-	glm::vec3(-31.077f, 8.333f, -39.762f), // P21
-	glm::vec3(-27.782f, 8.333f, -39.762f), // P22
-	glm::vec3(-25.023f, 8.333f, -39.762f), // P23
-	glm::vec3(-38.167f, 8.333f, -32.170f), // P24
-	glm::vec3(-38.167f, 8.333f, -35.937f)  // P25
+	glm::vec3(5.1064f,   8.3336f, -17.0502f),  // P1
+	glm::vec3(-5.5031f,  8.3336f, -17.0502f),  // P2
+	glm::vec3(-16.1718f, 8.3336f, -17.0502f),  // P3
+	glm::vec3(5.1064f,   8.3336f, -28.0097f),  // P4
+	glm::vec3(-5.5031f,  8.3336f, -28.0097f),  // P5
+	glm::vec3(-16.1718f, 8.3336f, -28.0097f),  // P6
+	glm::vec3(5.1064f,   8.3336f, -39.3118f),  // P7 (lampara larga: 4.85 x 0.91)
+	glm::vec3(-5.5031f,  8.3336f, -39.3118f),  // P8
+	glm::vec3(-16.1718f, 8.3336f, -39.3118f),  // P9
+	glm::vec3(-25.0226f, 8.3336f, -17.3416f),  // P10
+	glm::vec3(-27.7818f, 8.3336f, -17.3416f),  // P11
+	glm::vec3(-31.0772f, 8.3336f, -17.3416f),  // P12
+	glm::vec3(-34.7410f, 8.3336f, -17.3416f),  // P13
+	glm::vec3(-38.1671f, 8.3336f, -17.3416f),  // P14
+	glm::vec3(-38.1671f, 8.3336f, -20.2091f),  // P15
+	glm::vec3(-38.1671f, 8.3336f, -23.1389f),  // P16
+	glm::vec3(-38.1671f, 8.3336f, -26.0543f),  // P17
+	glm::vec3(-38.1671f, 8.3336f, -29.1360f),  // P18
+	glm::vec3(-38.1671f, 8.3336f, -39.7622f),  // P19
+	glm::vec3(-34.7410f, 8.3336f, -39.7622f),  // P20
+	glm::vec3(-31.0772f, 8.3336f, -39.7622f),  // P21
+	glm::vec3(-27.7818f, 8.3336f, -39.7622f),  // P22
+	glm::vec3(-25.0226f, 8.3336f, -39.7622f),  // P23
+	glm::vec3(-38.1671f, 8.3336f, -32.1696f),  // P24
+	glm::vec3(-38.1671f, 8.3336f, -35.9375f)   // P25
 };
 
 float vertices[] = {
@@ -747,9 +748,9 @@ int main()
 
 		// --- Luz direccional : Sol calido fuerte de dia, Luna fria tenue de noche ---
 		// (Simula la luz que entra por los ventanales del conjunto norte)
-		glm::vec3 dayDirAmb(0.55f, 0.55f, 0.50f);
-		glm::vec3 dayDirDif(0.95f, 0.90f, 0.78f); // tono calido del sol
-		glm::vec3 dayDirSpc(0.45f, 0.45f, 0.40f);
+		glm::vec3 dayDirAmb(0.66f, 0.66f, 0.61f);   // interior de dia mas iluminado sin quemar
+		glm::vec3 dayDirDif(1.03f, 0.98f, 0.85f); // tono calido del sol
+		glm::vec3 dayDirSpc(0.49f, 0.49f, 0.43f);
 		glm::vec3 nightDirAmb(0.04f, 0.04f, 0.08f);
 		glm::vec3 nightDirDif(0.10f, 0.12f, 0.22f); // tono frio de luna
 		glm::vec3 nightDirSpc(0.05f, 0.05f, 0.10f);
@@ -811,26 +812,34 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
 
-		// --- Luces de techo (9 focos) : Solo encedidas de noche ---
+		// --- Luces de techo (25 focos) : Solo encendidas de noche ---
 		glm::vec3 dayRoofDif(0.0f, 0.0f, 0.0f);
-		glm::vec3 nightRoofDif(2.5f, 2.3f, 2.0f);
+		glm::vec3 nightRoofDif(2.30f, 2.10f, 1.75f);   // cercano al original, solo un poco menos
 		glm::vec3 roofDif = glm::mix(nightRoofDif, dayRoofDif, dayFactor);
+
+		glm::vec3 dayRoofSpc(0.0f, 0.0f, 0.0f);
+		glm::vec3 nightRoofSpc(0.55f, 0.49f, 0.40f);   // specular separado para no blanquear
+		glm::vec3 roofSpc = glm::mix(nightRoofSpc, dayRoofSpc, dayFactor);
+
+		glm::vec3 dayRoofAmb(0.0f, 0.0f, 0.0f);
+		glm::vec3 nightRoofAmb(0.085f, 0.076f, 0.063f);
+		glm::vec3 roofAmb = glm::mix(nightRoofAmb, dayRoofAmb, dayFactor);
 
 		for (int i = 0; i < 25; i++) {
 			std::string base = "roofLights[" + std::to_string(i) + "].";
 			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "position").c_str()), roofLightPositions[i].x, roofLightPositions[i].y, roofLightPositions[i].z);
-			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "direction").c_str()), 0.0f, -1.0f, 0.0f); // Apuntan hacia abajo
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "direction").c_str()), 0.0f, -1.0f, 0.0f);
 
-			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "ambient").c_str()), 0.1f, 0.1f, 0.1f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "ambient").c_str()), roofAmb.r, roofAmb.g, roofAmb.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "diffuse").c_str()), roofDif.r, roofDif.g, roofDif.b);
-			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "specular").c_str()), roofDif.r, roofDif.g, roofDif.b);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, (base + "specular").c_str()), roofSpc.r, roofSpc.g, roofSpc.b);
 			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "constant").c_str()), 1.0f);
 
 			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "linear").c_str()), 0.007f);
 			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "quadratic").c_str()), 0.0002f);
 
-			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "cutOff").c_str()), glm::cos(glm::radians(45.0f)));
-			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "outerCutOff").c_str()), glm::cos(glm::radians(65.0f)));
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "cutOff").c_str()), glm::cos(glm::radians(43.0f)));
+			glUniform1f(glGetUniformLocation(lightingShader.Program, (base + "outerCutOff").c_str()), glm::cos(glm::radians(63.0f)));
 		}
 
 		// Set material properties
