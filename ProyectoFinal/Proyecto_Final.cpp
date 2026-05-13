@@ -147,203 +147,6 @@ struct Visitor {
 Visitor visitantes[6];
 // --------------------------------------------------------------------
 
-// --- SISTEMA DE REPRODUCCIÓN DE KEYFRAMES (VISITANTE) ---
-//#include <fstream>
-//#include <sstream>
-//
-//float visPosX = 0.0f, visPosY = 0.0f, visPosZ = 0.0f; // Posición en el lobby
-//float rotVis = 0.0f; // Rotación del cuerpo entero
-//
-//float R_Arm = 0.0f; // Brazo Derecho
-//float L_Arm = 0.0f; // Brazo Izquierdo
-//float R_Leg = 0.0f; // Pierna Derecha
-//float L_Leg = 0.0f; // Pierna Izquierda
-//
-//// --- VARIABLES PARA EL VISITANTE MASCULINO ---
-//float visMasPosX = 0.0f, visMasPosY = 0.0f, visMasPosZ = 0.0f;
-//float rotVisMas = 0.0f;
-//
-//float R_Arm_Mas = 0.0f;
-//float L_Arm_Mas = 0.0f;
-//float R_Leg_Mas = 0.0f;
-//float L_Leg_Mas = 0.0f; 
-//
-//#define MAX_FRAMES 100 
-//int i_max_steps = 80;
-//int i_curr_steps = 0;
-//
-//typedef struct _frame {
-//	float visPosX, visPosY, visPosZ;
-//	float incX, incY, incZ;
-//	float rotVis, rotVisInc;
-//	float R_Arm, R_ArmInc;
-//	float L_Arm, L_ArmInc;
-//	float R_Leg, R_LegInc;
-//	float L_Leg, L_LegInc;
-//} FRAME;
-//
-//FRAME KeyFrame[MAX_FRAMES];
-//int FrameIndex = 0;
-//bool play = false;
-//int playIndex = 0;
-//
-//// --- SISTEMA DE REPRODUCCIÓN (VISITANTE MASCULINO) ---
-//FRAME KeyFrameMas[MAX_FRAMES];
-//int FrameIndexMas = 0;
-//bool playMas = false;
-//int playIndexMas = 0;
-//int i_curr_steps_mas = 0;
-//
-//void resetElements(void) {
-//	visPosX = KeyFrame[0].visPosX;
-//	visPosY = KeyFrame[0].visPosY;
-//	visPosZ = KeyFrame[0].visPosZ;
-//	rotVis = KeyFrame[0].rotVis;
-//	R_Arm = KeyFrame[0].R_Arm;
-//	L_Arm = KeyFrame[0].L_Arm;
-//	R_Leg = KeyFrame[0].R_Leg;
-//	L_Leg = KeyFrame[0].L_Leg;
-//}
-//
-//void interpolation(void) {
-//	KeyFrame[playIndex].incX = (KeyFrame[playIndex + 1].visPosX - KeyFrame[playIndex].visPosX) / i_max_steps;
-//	KeyFrame[playIndex].incY = (KeyFrame[playIndex + 1].visPosY - KeyFrame[playIndex].visPosY) / i_max_steps;
-//	KeyFrame[playIndex].incZ = (KeyFrame[playIndex + 1].visPosZ - KeyFrame[playIndex].visPosZ) / i_max_steps;
-//	KeyFrame[playIndex].rotVisInc = (KeyFrame[playIndex + 1].rotVis - KeyFrame[playIndex].rotVis) / i_max_steps;
-//	KeyFrame[playIndex].R_ArmInc = (KeyFrame[playIndex + 1].R_Arm - KeyFrame[playIndex].R_Arm) / i_max_steps;
-//	KeyFrame[playIndex].L_ArmInc = (KeyFrame[playIndex + 1].L_Arm - KeyFrame[playIndex].L_Arm) / i_max_steps;
-//	KeyFrame[playIndex].R_LegInc = (KeyFrame[playIndex + 1].R_Leg - KeyFrame[playIndex].R_Leg) / i_max_steps;
-//	KeyFrame[playIndex].L_LegInc = (KeyFrame[playIndex + 1].L_Leg - KeyFrame[playIndex].L_Leg) / i_max_steps;
-//}
-//
-//void loadAnimationFromFile(void) {
-//	std::ifstream file("animacion_visitante.txt");
-//	if (file.is_open()) {
-//		file >> FrameIndex;
-//		for (int i = 0; i < FrameIndex; i++) {
-//			file >> KeyFrame[i].visPosX >> KeyFrame[i].visPosY >> KeyFrame[i].visPosZ
-//				>> KeyFrame[i].rotVis >> KeyFrame[i].R_Arm >> KeyFrame[i].L_Arm
-//				>> KeyFrame[i].R_Leg >> KeyFrame[i].L_Leg;
-//		}
-//		file.close();
-//		printf("Animacion preguardada cargada, Total frames: %d\n", FrameIndex);
-//		if (FrameIndex > 1) {
-//			resetElements();
-//			interpolation();
-//			play = true; // Se pone en true para que arranque solita
-//			playIndex = 0;
-//			i_curr_steps = 0;
-//		}
-//	}
-//	else {
-//		printf("No se encontro animacion_visitante.txt.\n");
-//	}
-//}
-//
-//void Animation() {
-//	if (play) {
-//		if (i_curr_steps >= i_max_steps) {
-//			playIndex++;
-//			if (playIndex > FrameIndex - 2) {
-//				playIndex = 0;
-//				resetElements();
-//				interpolation();
-//				i_curr_steps = 0;
-//			}
-//			else {
-//				i_curr_steps = 0;
-//				interpolation();
-//			}
-//		}
-//		else {
-//			visPosX += KeyFrame[playIndex].incX;
-//			visPosY += KeyFrame[playIndex].incY;
-//			visPosZ += KeyFrame[playIndex].incZ;
-//			rotVis += KeyFrame[playIndex].rotVisInc;
-//			R_Arm += KeyFrame[playIndex].R_ArmInc;
-//			L_Arm += KeyFrame[playIndex].L_ArmInc;
-//			R_Leg += KeyFrame[playIndex].R_LegInc;
-//			L_Leg += KeyFrame[playIndex].L_LegInc;
-//			i_curr_steps++;
-//		}
-//	}
-//}
-//
-//void resetElementsMas(void) {
-//	visMasPosX = KeyFrameMas[0].visPosX;
-//	visMasPosY = KeyFrameMas[0].visPosY;
-//	visMasPosZ = KeyFrameMas[0].visPosZ;
-//	rotVisMas = KeyFrameMas[0].rotVis;
-//	R_Arm_Mas = KeyFrameMas[0].R_Arm;
-//	L_Arm_Mas = KeyFrameMas[0].L_Arm;
-//	R_Leg_Mas = KeyFrameMas[0].R_Leg;
-//	L_Leg_Mas = KeyFrameMas[0].L_Leg;
-//}
-//
-//void interpolationMas(void) {
-//	KeyFrameMas[playIndexMas].incX = (KeyFrameMas[playIndexMas + 1].visPosX - KeyFrameMas[playIndexMas].visPosX) / i_max_steps;
-//	KeyFrameMas[playIndexMas].incY = (KeyFrameMas[playIndexMas + 1].visPosY - KeyFrameMas[playIndexMas].visPosY) / i_max_steps;
-//	KeyFrameMas[playIndexMas].incZ = (KeyFrameMas[playIndexMas + 1].visPosZ - KeyFrameMas[playIndexMas].visPosZ) / i_max_steps;
-//	KeyFrameMas[playIndexMas].rotVisInc = (KeyFrameMas[playIndexMas + 1].rotVis - KeyFrameMas[playIndexMas].rotVis) / i_max_steps;
-//	KeyFrameMas[playIndexMas].R_ArmInc = (KeyFrameMas[playIndexMas + 1].R_Arm - KeyFrameMas[playIndexMas].R_Arm) / i_max_steps;
-//	KeyFrameMas[playIndexMas].L_ArmInc = (KeyFrameMas[playIndexMas + 1].L_Arm - KeyFrameMas[playIndexMas].L_Arm) / i_max_steps;
-//	KeyFrameMas[playIndexMas].R_LegInc = (KeyFrameMas[playIndexMas + 1].R_Leg - KeyFrameMas[playIndexMas].R_Leg) / i_max_steps;
-//	KeyFrameMas[playIndexMas].L_LegInc = (KeyFrameMas[playIndexMas + 1].L_Leg - KeyFrameMas[playIndexMas].L_Leg) / i_max_steps;
-//}
-//
-//void loadAnimationFromFileMas(void) {
-//	std::ifstream file("animacion_masculino.txt");
-//	if (file.is_open()) {
-//		file >> FrameIndexMas;
-//		for (int i = 0; i < FrameIndexMas; i++) {
-//			file >> KeyFrameMas[i].visPosX >> KeyFrameMas[i].visPosY >> KeyFrameMas[i].visPosZ
-//				>> KeyFrameMas[i].rotVis >> KeyFrameMas[i].R_Arm >> KeyFrameMas[i].L_Arm
-//				>> KeyFrameMas[i].R_Leg >> KeyFrameMas[i].L_Leg;
-//		}
-//		file.close();
-//		printf("¡Animacion MASCULINA cargada! Total frames: %d\n", FrameIndexMas);
-//		if (FrameIndexMas > 1) {
-//			resetElementsMas();
-//			interpolationMas();
-//			playMas = true;
-//			playIndexMas = 0;
-//			i_curr_steps_mas = 0;
-//		}
-//	}
-//	else {
-//		printf("No se encontro animacion_masculino.txt.\n");
-//	}
-//}
-//
-//void AnimationMas() {
-//	if (playMas) {
-//		if (i_curr_steps_mas >= i_max_steps) {
-//			playIndexMas++;
-//			if (playIndexMas > FrameIndexMas - 2) {
-//				playIndexMas = 0;
-//				resetElementsMas();
-//				interpolationMas();
-//				i_curr_steps_mas = 0;
-//			}
-//			else {
-//				i_curr_steps_mas = 0;
-//				interpolationMas();
-//			}
-//		}
-//		else {
-//			visMasPosX += KeyFrameMas[playIndexMas].incX;
-//			visMasPosY += KeyFrameMas[playIndexMas].incY;
-//			visMasPosZ += KeyFrameMas[playIndexMas].incZ;
-//			rotVisMas += KeyFrameMas[playIndexMas].rotVisInc;
-//			R_Arm_Mas += KeyFrameMas[playIndexMas].R_ArmInc;
-//			L_Arm_Mas += KeyFrameMas[playIndexMas].L_ArmInc;
-//			R_Leg_Mas += KeyFrameMas[playIndexMas].R_LegInc;
-//			L_Leg_Mas += KeyFrameMas[playIndexMas].L_LegInc;
-//			i_curr_steps_mas++;
-//		}
-//	}
-//}
-
 // Function prototypes
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -668,6 +471,38 @@ int main()
 	Model torsoMasculino((char*)"Models/visitanteMasculino/torsoMasculino.obj");
 	Model piernaIzqMasculino((char*)"Models/visitanteMasculino/piernaIzqMasculino.obj");
 
+	// --- CARGA DE LOS NUEVOS VISITANTES FEMENINOS ---
+	// Mujer 2
+	Model cabezaFemenino2((char*)"Models/visitanteFemenino2/cabezaFemenino2.obj");
+	Model brazoDerFemenino2((char*)"Models/visitanteFemenino2/brazoDerFemenino2.obj");
+	Model brazoIzqFemenino2((char*)"Models/visitanteFemenino2/brazoIzqFemenino2.obj");
+	Model piernaDerFemenino2((char*)"Models/visitanteFemenino2/piernaDerFemenino2.obj");
+	Model torsoFemenino2((char*)"Models/visitanteFemenino2/torsoFemenino2.obj");
+	Model piernaIzqFemenino2((char*)"Models/visitanteFemenino2/piernaIzqFemenino2.obj");
+	// Mujer 3
+	Model cabezaFemenino3((char*)"Models/visitanteFemenino3/cabezaFemenino3.obj");
+	Model brazoDerFemenino3((char*)"Models/visitanteFemenino3/brazoDerFemenino3.obj");
+	Model brazoIzqFemenino3((char*)"Models/visitanteFemenino3/brazoIzqFemenino3.obj");
+	Model piernaDerFemenino3((char*)"Models/visitanteFemenino3/piernaDerFemenino3.obj");
+	Model torsoFemenino3((char*)"Models/visitanteFemenino3/torsoFemenino3.obj");
+	Model piernaIzqFemenino3((char*)"Models/visitanteFemenino3/piernaIzqFemenino3.obj");
+
+	// --- CARGA DE LOS NUEVOS VISITANTES MASCULINOS ---
+	// Hombre 2
+	Model cabezaMasculino2((char*)"Models/visitanteMasculino2/cabezaMasculino2.obj");
+	Model brazoDerMasculino2((char*)"Models/visitanteMasculino2/brazoDerMasculino2.obj");
+	Model brazoIzqMasculino2((char*)"Models/visitanteMasculino2/brazoIzqMasculino2.obj");
+	Model piernaDerMasculino2((char*)"Models/visitanteMasculino2/piernaDerMasculino2.obj");
+	Model torsoMasculino2((char*)"Models/visitanteMasculino2/torsoMasculino2.obj");
+	Model piernaIzqMasculino2((char*)"Models/visitanteMasculino2/piernaIzqMasculino2.obj");
+	// Hombre 3
+	Model cabezaMasculino3((char*)"Models/visitanteMasculino3/cabezaMasculino3.obj");
+	Model brazoDerMasculino3((char*)"Models/visitanteMasculino3/brazoDerMasculino3.obj");
+	Model brazoIzqMasculino3((char*)"Models/visitanteMasculino3/brazoIzqMasculino3.obj");
+	Model piernaDerMasculino3((char*)"Models/visitanteMasculino3/piernaDerMasculino3.obj");
+	Model torsoMasculino3((char*)"Models/visitanteMasculino3/torsoMasculino3.obj");
+	Model piernaIzqMasculino3((char*)"Models/visitanteMasculino3/piernaIzqMasculino3.obj");
+
 
 	// Setup VAO and VBO for the light cube
 	GLuint VBO, VAO;
@@ -696,13 +531,13 @@ int main()
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
 
-	// Cargar la animación del visitante al inicio
-	/*loadAnimationFromFile();
-	loadAnimationFromFileMas();*/
-
 	// Cargar las animaciones de los visitantes
-	visitantes[0].loadAnimationFromFile("animacion_visitante.txt"); // Mujer
-	visitantes[1].loadAnimationFromFile("animacion_masculino.txt"); // Hombre
+	visitantes[0].loadAnimationFromFile("animacion_visitante.txt");   // Mujer 1
+	visitantes[1].loadAnimationFromFile("animacion_masculino.txt");   // Hombre 1
+	visitantes[2].loadAnimationFromFile("animacion_femenina2.txt");   // Mujer 2
+	visitantes[3].loadAnimationFromFile("animacion_masculino2.txt");  // Hombre 2
+	visitantes[4].loadAnimationFromFile("animacion_femenina3.txt");   // Mujer 3
+	visitantes[5].loadAnimationFromFile("animacion_masculino3.txt");  // Hombre 3
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -715,11 +550,8 @@ int main()
 		glfwPollEvents();
 		DoMovement();
 
-		/*Animation();
-		AnimationMas();*/
-
-		// Actualizar el "cerebro" de los 2 visitantes actuales
-		for (int i = 0; i < 2; i++) {
+		// Control de los 6 visitantes actuales
+		for (int i = 0; i < 6; i++) {
 			visitantes[i].animate();
 		}
 
@@ -1029,117 +861,221 @@ int main()
 		piernaIzqMasculino.Draw(lightingShader);
 		// ----------------------------------------
 
-		//// --- DIBUJADO DEL VISITANTE ANIMADO POR KEYFRAMES ---
-		//glm::mat4 baseModel = glm::mat4(1.0f);
+		// ====================================================================
+		// DIBUJADO DE LA MUJER 2 (Index 2)
+		// ====================================================================
+		glm::mat4 baseModelFem2 = glm::mat4(1.0f);
 
-		//// 1. Aplicamos el desplazamiento del recorrido (Caminata del Keyframe)
-		//baseModel = glm::translate(baseModel, glm::vec3(visPosX, visPosY, visPosZ));
+		// 1. DESFASE: La posicionamos en su lugar del lobby (Atrás y a la izquierda)
+		baseModelFem2 = glm::translate(baseModelFem2, glm::vec3(-18.2f, 0.0f, -6.6f));
 
-		//// 2. Rotar sobre su propio centro
-		//glm::vec3 pivotCentro(-4.2f, 0.0f, -11.5f); // Centro de gravedad de tu modelo
-		//baseModel = glm::translate(baseModel, pivotCentro);
-		//baseModel = glm::rotate(baseModel, glm::radians(rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
-		//baseModel = glm::translate(baseModel, -pivotCentro);
+		// 2. Aplicamos la animación (.txt)
+		baseModelFem2 = glm::translate(baseModelFem2, glm::vec3(visitantes[2].posX, visitantes[2].posY, visitantes[2].posZ));
 
-		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		// 3. Pivote original de la Mujer 1
+		glm::vec3 pivotCentroFem2(-4.2f, 0.0f, -11.5f);
+		baseModelFem2 = glm::translate(baseModelFem2, pivotCentroFem2);
+		baseModelFem2 = glm::rotate(baseModelFem2, glm::radians(visitantes[2].rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModelFem2 = glm::translate(baseModelFem2, -pivotCentroFem2);
 
-		//// Cabeza y Torso
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModel));
-		//cabezaFemenino.Draw(lightingShader);
-		//torsoFemenino.Draw(lightingShader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelFem2));
+		cabezaFemenino2.Draw(lightingShader);
+		torsoFemenino2.Draw(lightingShader);
 
-		//// Brazo Derecho
-		//model = baseModel;
-		//glm::vec3 pivotBrazoDer(-3.8167f, 3.5118f, -11.4444f);
-		//model = glm::translate(model, pivotBrazoDer);
-		//model = glm::rotate(model, glm::radians(R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotBrazoDer);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//brazoDerFemenino.Draw(lightingShader);
+		// Extremidades con pivotes y rotaciones originales (Eje X)
+		model = baseModelFem2;
+		glm::vec3 pivotBrazoDerFem2(-3.8167f, 3.5118f, -11.4444f);
+		model = glm::translate(model, pivotBrazoDerFem2);
+		model = glm::rotate(model, glm::radians(visitantes[2].R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoDerFem2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerFemenino2.Draw(lightingShader);
 
-		//// Brazo Izquierdo
-		//model = baseModel;
-		//glm::vec3 pivotBrazoIzq(-4.5887f, 3.5097f, -11.4444f);
-		//model = glm::translate(model, pivotBrazoIzq);
-		//model = glm::rotate(model, glm::radians(L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotBrazoIzq);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//brazoIzqFemenino.Draw(lightingShader);
+		model = baseModelFem2;
+		glm::vec3 pivotBrazoIzqFem2(-4.5887f, 3.5097f, -11.4444f);
+		model = glm::translate(model, pivotBrazoIzqFem2);
+		model = glm::rotate(model, glm::radians(visitantes[2].L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoIzqFem2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqFemenino2.Draw(lightingShader);
 
-		//// Pierna Derecha
-		//model = baseModel;
-		//glm::vec3 pivotPiernaDer(-3.8924f, 2.6617f, -11.6100f);
-		//model = glm::translate(model, pivotPiernaDer);
-		//model = glm::rotate(model, glm::radians(R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotPiernaDer);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//piernaDerFemenino.Draw(lightingShader);
+		model = baseModelFem2;
+		glm::vec3 pivotPiernaDerFem2(-3.8924f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaDerFem2);
+		model = glm::rotate(model, glm::radians(visitantes[2].R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaDerFem2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerFemenino2.Draw(lightingShader);
 
-		//// Pierna Izquierda
-		//model = baseModel;
-		//glm::vec3 pivotPiernaIzq(-4.5216f, 2.6617f, -11.6100f);
-		//model = glm::translate(model, pivotPiernaIzq);
-		//model = glm::rotate(model, glm::radians(L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotPiernaIzq);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//piernaIzqFemenino.Draw(lightingShader);
-		//// ----------------------------------------------------
+		model = baseModelFem2;
+		glm::vec3 pivotPiernaIzqFem2(-4.5216f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaIzqFem2);
+		model = glm::rotate(model, glm::radians(visitantes[2].L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaIzqFem2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaIzqFemenino2.Draw(lightingShader);
 
-		//// --- DIBUJADO DEL VISITANTE MASCULINO ---
-		//glm::mat4 baseModelMas = glm::mat4(1.0f);
 
-		//// 1. Posición ajustable desde las variables globales
-		//baseModelMas = glm::translate(baseModelMas, glm::vec3(visMasPosX, visMasPosY, visMasPosZ));
+		// ====================================================================
+		// DIBUJADO DEL HOMBRE 2 (Index 3)
+		// ====================================================================
+		glm::mat4 baseModelMas2 = glm::mat4(1.0f);
 
-		//// 2. Pivote central del hombre (para evitar teletransportación)
-		//glm::vec3 pivotCentroMas(-7.8431f, 0.0f, -11.5270f);
-		//baseModelMas = glm::translate(baseModelMas, pivotCentroMas);
-		//baseModelMas = glm::rotate(baseModelMas, glm::radians(rotVisMas), glm::vec3(0.0f, 1.0f, 0.0f));
-		//baseModelMas = glm::translate(baseModelMas, -pivotCentroMas);
+		// 1. DESFASE: Lo posicionamos en su lugar del lobby
+		baseModelMas2 = glm::translate(baseModelMas2, glm::vec3(-38.0f, 0.0f, -3.3f));
 
-		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		// 2. Animación
+		baseModelMas2 = glm::translate(baseModelMas2, glm::vec3(visitantes[3].posX, visitantes[3].posY, visitantes[3].posZ));
 
-		//// Cabeza y Torso
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelMas));
-		//cabezaMasculino.Draw(lightingShader);
-		//torsoMasculino.Draw(lightingShader); 
+		// 3. Pivote original del Hombre 1
+		glm::vec3 pivotCentroMas2(-7.8431f, 0.0f, -11.5270f);
+		baseModelMas2 = glm::translate(baseModelMas2, pivotCentroMas2);
+		baseModelMas2 = glm::rotate(baseModelMas2, glm::radians(visitantes[3].rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModelMas2 = glm::translate(baseModelMas2, -pivotCentroMas2);
 
-		//// Brazo Derecho
-		//model = baseModelMas;
-		//glm::vec3 pivotBDMas(-7.4376f, 3.6748f, -11.4620f);
-		//model = glm::translate(model, pivotBDMas);
-		//model = glm::rotate(model, glm::radians(R_Arm_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotBDMas);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//brazoDerMasculino.Draw(lightingShader);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelMas2));
+		cabezaMasculino2.Draw(lightingShader);
+		torsoMasculino2.Draw(lightingShader);
 
-		//// Brazo Izquierdo
-		//model = baseModelMas;
-		//glm::vec3 pivotBIMas(-8.2487f, 3.6743f, -11.4460f);
-		//model = glm::translate(model, pivotBIMas);
-		//model = glm::rotate(model, glm::radians(L_Arm_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotBIMas);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//brazoIzqMasculino.Draw(lightingShader);
+		model = baseModelMas2;
+		glm::vec3 pivotBDMas2(-7.4376f, 3.6748f, -11.4620f);
+		model = glm::translate(model, pivotBDMas2);
+		model = glm::rotate(model, glm::radians(visitantes[3].R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBDMas2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerMasculino2.Draw(lightingShader);
 
-		//// Pierna Derecha
-		//model = baseModelMas;
-		//glm::vec3 pivotPDMas(-7.5539f, 2.8185f, -11.5980f);
-		//model = glm::translate(model, pivotPDMas);
-		//model = glm::rotate(model, glm::radians(R_Leg_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotPDMas);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//piernaDerMasculino.Draw(lightingShader);
+		model = baseModelMas2;
+		glm::vec3 pivotBIMas2(-8.2487f, 3.6743f, -11.4460f);
+		model = glm::translate(model, pivotBIMas2);
+		model = glm::rotate(model, glm::radians(visitantes[3].L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBIMas2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqMasculino2.Draw(lightingShader);
 
-		//// Pierna Izquierda
-		//model = baseModelMas;
-		//glm::vec3 pivotPIMas(-8.1341f, 2.8189f, -11.5870f);
-		//model = glm::translate(model, pivotPIMas);
-		//model = glm::rotate(model, glm::radians(L_Leg_Mas), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, -pivotPIMas);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); 
-		//piernaIzqMasculino.Draw(lightingShader); 
-		//// ----------------------------------------
+		model = baseModelMas2;
+		glm::vec3 pivotPDMas2(-7.5539f, 2.8185f, -11.5980f);
+		model = glm::translate(model, pivotPDMas2);
+		model = glm::rotate(model, glm::radians(visitantes[3].R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPDMas2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerMasculino2.Draw(lightingShader);
+
+		model = baseModelMas2;
+		glm::vec3 pivotPIMas2(-8.1341f, 2.8189f, -11.5870f);
+		model = glm::translate(model, pivotPIMas2);
+		model = glm::rotate(model, glm::radians(visitantes[3].L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPIMas2);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaIzqMasculino2.Draw(lightingShader);
+
+
+		// ====================================================================
+		// DIBUJADO DE LA MUJER 3 (Index 4)
+		// ====================================================================
+		glm::mat4 baseModelFem3 = glm::mat4(1.0f);
+
+		// 1. DESFASE: La posicionamos en su lugar del lobby
+		baseModelFem3 = glm::translate(baseModelFem3, glm::vec3(13.3f, 0.0f, -25.7f));
+
+		// 2. Animación
+		baseModelFem3 = glm::translate(baseModelFem3, glm::vec3(visitantes[4].posX, visitantes[4].posY, visitantes[4].posZ));
+
+		// 3. Pivote original de la Mujer 1
+		glm::vec3 pivotCentroFem3(-4.2f, 0.0f, -11.5f);
+		baseModelFem3 = glm::translate(baseModelFem3, pivotCentroFem3);
+		baseModelFem3 = glm::rotate(baseModelFem3, glm::radians(visitantes[4].rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModelFem3 = glm::translate(baseModelFem3, -pivotCentroFem3);
+
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelFem3));
+		cabezaFemenino3.Draw(lightingShader);
+		torsoFemenino3.Draw(lightingShader);
+
+		model = baseModelFem3;
+		glm::vec3 pivotBrazoDerFem3(-3.8167f, 3.5118f, -11.4444f);
+		model = glm::translate(model, pivotBrazoDerFem3);
+		model = glm::rotate(model, glm::radians(visitantes[4].R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoDerFem3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerFemenino3.Draw(lightingShader);
+
+		model = baseModelFem3;
+		glm::vec3 pivotBrazoIzqFem3(-4.5887f, 3.5097f, -11.4444f);
+		model = glm::translate(model, pivotBrazoIzqFem3);
+		model = glm::rotate(model, glm::radians(visitantes[4].L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBrazoIzqFem3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqFemenino3.Draw(lightingShader);
+
+		model = baseModelFem3;
+		glm::vec3 pivotPiernaDerFem3(-3.8924f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaDerFem3);
+		model = glm::rotate(model, glm::radians(visitantes[4].R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaDerFem3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerFemenino3.Draw(lightingShader);
+
+		model = baseModelFem3;
+		glm::vec3 pivotPiernaIzqFem3(-4.5216f, 2.6617f, -11.6100f);
+		model = glm::translate(model, pivotPiernaIzqFem3);
+		model = glm::rotate(model, glm::radians(visitantes[4].L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPiernaIzqFem3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaIzqFemenino3.Draw(lightingShader);
+
+
+		// ====================================================================
+		// DIBUJADO DEL HOMBRE 3 (Index 5)
+		// ====================================================================
+		glm::mat4 baseModelMas3 = glm::mat4(1.0f);
+
+		// 1. DESFASE: Lo posicionamos en su lugar del lobby
+		baseModelMas3 = glm::translate(baseModelMas3, glm::vec3(-38.0f, 0.0f, -27.5f));
+
+		// 2. Animación
+		baseModelMas3 = glm::translate(baseModelMas3, glm::vec3(visitantes[5].posX, visitantes[5].posY, visitantes[5].posZ));
+
+		// 3. Pivote original del Hombre 1
+		glm::vec3 pivotCentroMas3(-7.8431f, 0.0f, -11.5270f);
+		baseModelMas3 = glm::translate(baseModelMas3, pivotCentroMas3);
+		baseModelMas3 = glm::rotate(baseModelMas3, glm::radians(visitantes[5].rotVis), glm::vec3(0.0f, 1.0f, 0.0f));
+		baseModelMas3 = glm::translate(baseModelMas3, -pivotCentroMas3);
+
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(baseModelMas3));
+		cabezaMasculino3.Draw(lightingShader);
+		torsoMasculino3.Draw(lightingShader);
+
+		model = baseModelMas3;
+		glm::vec3 pivotBDMas3(-7.4376f, 3.6748f, -11.4620f);
+		model = glm::translate(model, pivotBDMas3);
+		model = glm::rotate(model, glm::radians(visitantes[5].R_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBDMas3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoDerMasculino3.Draw(lightingShader);
+
+		model = baseModelMas3;
+		glm::vec3 pivotBIMas3(-8.2487f, 3.6743f, -11.4460f);
+		model = glm::translate(model, pivotBIMas3);
+		model = glm::rotate(model, glm::radians(visitantes[5].L_Arm), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotBIMas3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		brazoIzqMasculino3.Draw(lightingShader);
+
+		model = baseModelMas3;
+		glm::vec3 pivotPDMas3(-7.5539f, 2.8185f, -11.5980f);
+		model = glm::translate(model, pivotPDMas3);
+		model = glm::rotate(model, glm::radians(visitantes[5].R_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPDMas3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaDerMasculino3.Draw(lightingShader);
+
+		model = baseModelMas3;
+		glm::vec3 pivotPIMas3(-8.1341f, 2.8189f, -11.5870f);
+		model = glm::translate(model, pivotPIMas3);
+		model = glm::rotate(model, glm::radians(visitantes[5].L_Leg), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, -pivotPIMas3);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		piernaIzqMasculino3.Draw(lightingShader);
 
 		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
 
