@@ -358,10 +358,10 @@ private:
 		}
 
 		// -- ZONA DEL BANNER --
-		float cartel_minX = -20.282f - 1.5f;
-		float cartel_maxX = -20.282f + 1.5f;
-		float cartel_minZ = -38.374f - 1.5f;
-		float cartel_maxZ = -38.374f + 1.5f;
+		float cartel_minX = -0.6414f - 1.5f;
+		float cartel_maxX = -0.6414f + 1.5f;
+		float cartel_minZ = -3.3628f - 1.5f;
+		float cartel_maxZ = -3.3628f + 1.5f;
 
 		if (targetPos.x > (cartel_minX - buffer) && targetPos.x < (cartel_maxX + buffer) &&
 			targetPos.z >(cartel_minZ - buffer) && targetPos.z < (cartel_maxZ + buffer)) {

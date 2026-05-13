@@ -1141,48 +1141,54 @@ int main()
 		//piernaIzqMasculino.Draw(lightingShader); 
 		//// ----------------------------------------
 
-		//// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
+		// --- LÓGICA DE ANIMACIÓN DEL ROLL-UP ---
 
-		////DIBUJAR LA BASE 
-		//model = glm::mat4(1);
-		//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//tubo.Draw(lightingShader);
+		// Posición global donde queremos colocar todo el roll-up (tubo y lona)
+		glm::vec3 posicionRollup = glm::vec3(-0.6414f, 0.0f, -3.3628f);
 
-		//// LÓGICA Y DIBUJO DE LA LONA
-		////abierto / cerrado
-		//if (bannerOpen) {
-		//	if (animProgress < 1.0f) {
-		//		animProgress += deltaTime * 1.0f; // Velocidad de caída
-		//		if (animProgress > 1.0f) animProgress = 1.0f;
-		//	}
-		//}
-		//else {
-		//	if (animProgress > 0.0f) {
-		//		animProgress -= deltaTime * 1.5f; // Sube un poco más rápido de lo que cae
-		//		if (animProgress < 0.0f) animProgress = 0.0f;
-		//	}
-		//}
+		// DIBUJAR LA BASE 
+		glm::mat4 modelTubo = glm::mat4(1.0f);
+		modelTubo = glm::translate(modelTubo, posicionRollup);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelTubo));
+		tubo.Draw(lightingShader);
 
-		//if (animProgress > 0.0f) {
-		//	float Sy = easeOutBack(animProgress);
-		//	if (Sy < 0.001f) Sy = 0.001f;
+		// LÓGICA Y DIBUJO DE LA LONA (BANNER)
+		if (bannerOpen) {
+			if (animProgress < 1.0f) {
+				animProgress += deltaTime * 1.0f; // Velocidad de caída
+				if (animProgress > 1.0f) animProgress = 1.0f;
+			}
+		}
+		else {
+			if (animProgress > 0.0f) {
+				animProgress -= deltaTime * 1.5f; // Sube un poco más rápido de lo que cae
+				if (animProgress < 0.0f) animProgress = 0.0f;
+			}
+		}
 
-		//	float Y_TUBO = 4.88f;
-		//	float Ty = ALTURA_LONA * (1.0f - Sy);
+		if (animProgress > 0.0f) {
+			float Sy = easeOutBack(animProgress);
+			if (Sy < 0.001f) Sy = 0.001f;
 
-		//	model = glm::mat4(1);
-		//	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.01f));
+			float Y_TUBO = 4.88f; // Eje de anclaje de la lona
 
-		//	// Transformación anclada arriba
-		//	model = glm::translate(model, glm::vec3(0.0f, Y_TUBO, 0.0f));
-		//	model = glm::scale(model, glm::vec3(1.0f, Sy, 1.0f));
-		//	model = glm::translate(model, glm::vec3(0.0f, -Y_TUBO, 0.0f));
+			glm::mat4 modelBanner = glm::mat4(1.0f);
 
-		//	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//	banner.Draw(lightingShader);
-		//}
-		//// ----------------------------------------
+			// 1. Traslación al mismo punto base que el tubo
+			modelBanner = glm::translate(modelBanner, posicionRollup);
+
+			// 2. Pequeño offset en Z para evitar Z-fighting con la malla del tubo
+			modelBanner = glm::translate(modelBanner, glm::vec3(0.0f, 0.0f, 0.01f));
+
+			// 3. Transformación local anclada arriba para el despliegue
+			modelBanner = glm::translate(modelBanner, glm::vec3(0.0f, Y_TUBO, 0.0f));
+			modelBanner = glm::scale(modelBanner, glm::vec3(1.0f, Sy, 1.0f));
+			modelBanner = glm::translate(modelBanner, glm::vec3(0.0f, -Y_TUBO, 0.0f));
+
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelBanner));
+			banner.Draw(lightingShader);
+		}
+		// ----------------------------------------
 
 		// ====================================================================
 		// BANDERA PUBLICITARIA - Deformacion Procedimental de Vertices 
